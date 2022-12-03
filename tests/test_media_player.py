@@ -25,6 +25,7 @@ from homeassistant.components.media_player import (
     SERVICE_VOLUME_MUTE,
     SERVICE_VOLUME_SET,
     SERVICE_VOLUME_UP,
+    MediaPlayerState,
 )
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import (
@@ -35,9 +36,6 @@ from homeassistant.const import (
     CONF_NAME,
     CONF_PORT,
     EVENT_HOMEASSISTANT_STOP,
-    STATE_OFF,
-    STATE_PLAYING,
-    STATE_STANDBY,
     STATE_UNAVAILABLE,
 )
 from homeassistant.helpers.entity_component import async_update_entity
@@ -229,7 +227,7 @@ async def test_reconnect(hass, caplog, config):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     caplog.clear()
     caplog.set_level(logging.WARNING)
@@ -255,7 +253,7 @@ async def test_reconnect(hass, caplog, config):
 
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_STANDBY
+        assert state.state == MediaPlayerState.STANDBY
         assert MSG_RECONNECT[patch_key] in caplog.record_tuples[2]
 
 
@@ -310,7 +308,7 @@ async def test_setup_with_adbkey(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
 
 @pytest.mark.parametrize(
@@ -340,7 +338,7 @@ async def test_sources(hass, config):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     patch_update = patchers.patch_androidtv_update(
         "playing",
@@ -356,7 +354,7 @@ async def test_sources(hass, config):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_PLAYING
+        assert state.state == MediaPlayerState.PLAYING
         assert state.attributes["source"] == "TEST 1"
         assert sorted(state.attributes["source_list"]) == ["TEST 1", "com.app.test2"]
 
@@ -374,7 +372,7 @@ async def test_sources(hass, config):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_PLAYING
+        assert state.state == MediaPlayerState.PLAYING
         assert state.attributes["source"] == "com.app.test2"
         assert sorted(state.attributes["source_list"]) == ["TEST 1", "com.app.test2"]
 
@@ -408,7 +406,7 @@ async def test_exclude_sources(hass, config, expected_sources):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     patch_update = patchers.patch_androidtv_update(
         "playing",
@@ -430,7 +428,7 @@ async def test_exclude_sources(hass, config, expected_sources):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_PLAYING
+        assert state.state == MediaPlayerState.PLAYING
         assert state.attributes["source"] == "TEST 1"
         assert sorted(state.attributes["source_list"]) == expected_sources
 
@@ -452,7 +450,7 @@ async def _test_select_source(
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     with method_patch as method_patch_used:
         await hass.services.async_call(
@@ -714,7 +712,7 @@ async def test_update_lock_not_acquired(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     with patch(
         "androidtv.androidtv.androidtv_async.AndroidTVAsync.update",
@@ -723,13 +721,13 @@ async def test_update_lock_not_acquired(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
     with patchers.patch_shell(SHELL_RESPONSE_STANDBY)[patch_key]:
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_STANDBY
+        assert state.state == MediaPlayerState.STANDBY
 
 
 async def test_download(hass):
@@ -1090,7 +1088,7 @@ async def test_exception(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
         # When an unforeseen exception occurs, we close the ADB connection and raise the exception
         with patchers.PATCH_ANDROIDTV_UPDATE_EXCEPTION, pytest.raises(Exception):
@@ -1103,7 +1101,7 @@ async def test_exception(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
 
 async def test_options_reload(hass):
@@ -1120,7 +1118,7 @@ async def test_options_reload(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
 
         with patchers.PATCH_SETUP_ENTRY as setup_entry_call:
             # change an option that not require integration reload
@@ -1159,7 +1157,7 @@ async def test_migrate_options_key(hass):
         await async_update_entity(hass, entity_id)
         state = hass.states.get(entity_id)
         assert state is not None
-        assert state.state == STATE_OFF
+        assert state.state == MediaPlayerState.OFF
         entry = hass.config_entries.async_get_entry(config_entry.entry_id)
         assert CONF_TURN_ON_COMMAND not in entry.options
         assert CONF_CUSTOM_COMMANDS in entry.options
