@@ -1,5 +1,5 @@
 {
   "name": "AndroidTV Custom",
   "content_in_root": false,
-  "homeassistant": "2022.8.0"
+  "homeassistant": "2022.9.0"
 }
