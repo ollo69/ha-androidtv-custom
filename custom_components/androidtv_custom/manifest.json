@@ -5,12 +5,19 @@
   "issue_tracker": "https://github.com/ollo69/ha-androidtv-custom/issues",
   "requirements": [
     "adb-shell[async]==0.4.3",
-    "androidtv[async]==0.0.69",
+    "androidtv[async]==0.0.70",
     "pure-python-adb[async]==0.3.0.dev0"
   ],
-  "codeowners": ["@JeffLIrion", "@ollo69"],
+  "codeowners": [
+    "@JeffLIrion",
+    "@ollo69"
+  ],
   "config_flow": true,
   "iot_class": "local_polling",
-  "loggers": ["adb_shell", "androidtv", "pure_python_adb"],
-  "version": "0.1.2"
+  "loggers": [
+    "adb_shell",
+    "androidtv",
+    "pure_python_adb"
+  ],
+  "version": "0.1.3"
 }
