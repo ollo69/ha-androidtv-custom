@@ -11,7 +11,12 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_DEVICE_CLASS, CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.selector import selector
+from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 from . import async_connect_androidtv, get_androidtv_mac
 from .const import (
@@ -218,16 +223,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Return initial configuration form."""
 
         apps_list = {k: f"{v} ({k})" if v else k for k, v in self._apps.items()}
-        apps = [{"label": "Add new", "value": APPS_NEW_ID}] + [
-            {"label": v, "value": k} for k, v in apps_list.items()
+        apps = [SelectOptionDict(value=APPS_NEW_ID, label="Add new")] + [
+            SelectOptionDict(value=k, label=v) for k, v in apps_list.items()
         ]
         rules = [RULES_NEW_ID] + list(self._state_det_rules)
         options = self.config_entry.options
 
         data_schema = vol.Schema(
             {
-                vol.Optional(CONF_APPS): selector(
-                    {"select": {"options": apps, "mode": "dropdown"}}
+                vol.Optional(CONF_APPS): SelectSelector(
+                    SelectSelectorConfig(options=apps, mode=SelectSelectorMode.DROPDOWN)
                 ),
                 vol.Optional(
                     CONF_GET_SOURCES,
@@ -243,9 +248,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_SCREENCAP,
                     default=options.get(CONF_SCREENCAP, DEFAULT_SCREENCAP),
                 ): bool,
-                vol.Optional(CONF_CUSTOM_COMMANDS): vol.In(HA_CUSTOMIZABLE_COMMANDS),
-                vol.Optional(CONF_STATE_DETECTION_RULES): selector(
-                    {"select": {"options": rules, "mode": "dropdown"}}
+                vol.Optional(CONF_CUSTOM_COMMANDS): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(HA_CUSTOMIZABLE_COMMANDS),
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Optional(CONF_STATE_DETECTION_RULES): SelectSelector(
+                    SelectSelectorConfig(
+                        options=rules, mode=SelectSelectorMode.DROPDOWN
+                    )
                 ),
             }
         )
