@@ -11,6 +11,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_DEVICE_CLASS, CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.selector import selector
 
 from . import async_connect_androidtv, get_androidtv_mac
 from .const import (
@@ -217,13 +218,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Return initial configuration form."""
 
         apps_list = {k: f"{v} ({k})" if v else k for k, v in self._apps.items()}
-        apps = {APPS_NEW_ID: "Add new", **apps_list}
+        apps = [{"label": "Add new", "value": APPS_NEW_ID}] + [
+            {"label": v, "value": k} for k, v in apps_list.items()
+        ]
         rules = [RULES_NEW_ID] + list(self._state_det_rules)
         options = self.config_entry.options
 
         data_schema = vol.Schema(
             {
-                vol.Optional(CONF_APPS): vol.In(apps),
+                vol.Optional(CONF_APPS): selector(
+                    {"select": {"options": apps, "mode": "dropdown"}}
+                ),
                 vol.Optional(
                     CONF_GET_SOURCES,
                     default=options.get(CONF_GET_SOURCES, DEFAULT_GET_SOURCES),
@@ -239,7 +244,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     default=options.get(CONF_SCREENCAP, DEFAULT_SCREENCAP),
                 ): bool,
                 vol.Optional(CONF_CUSTOM_COMMANDS): vol.In(HA_CUSTOMIZABLE_COMMANDS),
-                vol.Optional(CONF_STATE_DETECTION_RULES): vol.In(rules),
+                vol.Optional(CONF_STATE_DETECTION_RULES): selector(
+                    {"select": {"options": rules, "mode": "dropdown"}}
+                ),
             }
         )
 
