@@ -13,5 +13,5 @@
   "config_flow": true,
   "iot_class": "local_polling",
   "loggers": ["adb_shell", "androidtv", "pure_python_adb"],
-  "version": "0.1.5"
+  "version": "0.1.6"
 }
