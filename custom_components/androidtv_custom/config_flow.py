@@ -1,5 +1,4 @@
 """Config flow to configure the Android TV integration."""
-import json
 import logging
 import os
 
@@ -12,6 +11,7 @@ from homeassistant.const import CONF_DEVICE_CLASS, CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.selector import (
+    ObjectSelector,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
@@ -342,8 +342,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if rule_id:
                 if user_input.get(CONF_RULE_DELETE, False):
                     self._state_det_rules.pop(rule_id)
-                elif str_det_rule := user_input.get(CONF_RULE_VALUES):
-                    state_det_rule = _validate_state_det_rules(str_det_rule)
+                elif det_rule := user_input.get(CONF_RULE_VALUES):
+                    state_det_rule = _validate_state_det_rules(det_rule)
                     if state_det_rule is None:
                         return self._async_rules_form(
                             rule_id=self._conf_rule_id or RULES_NEW_ID,
@@ -357,13 +357,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     @callback
     def _async_rules_form(self, rule_id, default_id="", errors=None):
         """Return configuration form for detection rules."""
-        state_det_rule = self._state_det_rules.get(rule_id)
-        str_det_rule = json.dumps(state_det_rule) if state_det_rule else ""
-
         data_schema = {}
         if rule_id == RULES_NEW_ID:
             data_schema[vol.Optional(CONF_RULE_ID, default=default_id)] = str
-        data_schema[vol.Optional(CONF_RULE_VALUES, default=str_det_rule)] = str
+        data_schema[
+            vol.Optional(CONF_RULE_VALUES, default=self._state_det_rules.get(rule_id))
+        ] = ObjectSelector()
         if rule_id != RULES_NEW_ID:
             data_schema[vol.Optional(CONF_RULE_DELETE, default=False)] = bool
 
@@ -379,12 +378,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
 def _validate_state_det_rules(state_det_rules):
     """Validate a string that contain state detection rules and return a dict."""
-    try:
-        json_rules = json.loads(state_det_rules)
-    except ValueError:
-        _LOGGER.warning("Error loading state detection rules")
-        return None
-
+    json_rules = state_det_rules
     if not isinstance(json_rules, list):
         json_rules = [json_rules]
 

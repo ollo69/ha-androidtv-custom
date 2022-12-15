@@ -1,5 +1,4 @@
 """Tests for the AndroidTV config flow."""
-import json
 from unittest.mock import patch
 
 from androidtv.constants import CUSTOM_TURN_OFF, CUSTOM_TURN_ON
@@ -451,7 +450,7 @@ async def test_options_flow(hass):
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={
-                CONF_RULE_VALUES: json.dumps({"a": "b"}),
+                CONF_RULE_VALUES: {"a": "b"},
             },
         )
         assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
@@ -462,7 +461,7 @@ async def test_options_flow(hass):
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={
-                CONF_RULE_VALUES: json.dumps(["standby"]),
+                CONF_RULE_VALUES: ["standby"],
             },
         )
         assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
@@ -483,7 +482,7 @@ async def test_options_flow(hass):
             result["flow_id"],
             user_input={
                 CONF_RULE_ID: "rule2",
-                CONF_RULE_VALUES: json.dumps(VALID_DETECT_RULE),
+                CONF_RULE_VALUES: VALID_DETECT_RULE,
             },
         )
         assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
