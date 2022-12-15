@@ -1,6 +1,7 @@
 {
   "domain": "androidtv_custom",
   "name": "Android TV Custom",
+  "integration_type": "device",
   "documentation": "https://www.home-assistant.io/integrations/androidtv",
   "issue_tracker": "https://github.com/ollo69/ha-androidtv-custom/issues",
   "requirements": [
@@ -12,5 +13,5 @@
   "config_flow": true,
   "iot_class": "local_polling",
   "loggers": ["adb_shell", "androidtv", "pure_python_adb"],
-  "version": "0.1.4"
+  "version": "0.1.5"
 }
